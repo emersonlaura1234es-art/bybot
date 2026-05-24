@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#05050f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BYBOT">
+<title>BYBOT.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+  :root{
+    --bg:#05050f;--bg2:#0a0a1e;--bg3:#0d0d28;
+    --border:#151535;--text:#c8c8f0;--dim:#444466;
+    --green:#00e676;--red:#ff1744;--orange:#ff6b00;--yellow:#ffd600;--purple:#a78bfa;
+  }
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace}
+  ::-webkit-scrollbar{display:none}
+
+  /* LAYOUT */
+  #app{height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative}
+  
+  /* HEADER */
+  #header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px 8px;flex-shrink:0}
+  .hrow{display:flex;justify-content:space-between;align-items:center}
+  .logo{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:3px;color:#fff}
+  .logo span{color:var(--orange)}
+  .pairs{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px}
+  .pair{flex-shrink:0;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;
+    background:var(--bg3);color:var(--dim);border:1px solid var(--border);transition:.2s}
+  .pair.active{background:#ff6b0018;color:var(--orange);border-color:var(--orange)}
+
+  /* CONTENT */
+  #content{flex:1;overflow-y:auto;padding-bottom:4px}
+
+  /* CARDS */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin:10px 12px}
+  .card-title{font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+
+  /* PRICE */
+  .price-big{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:#fff;letter-spacing:-1px}
+  .price-chg{font-size:12px;font-weight:700;margin-left:10px}
+  .up{color:var(--green)}.down{color:var(--red)}
+
+  /* SIGNAL PILL */
+  .sig-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;
+    font-weight:700;font-size:11px;letter-spacing:2px;margin-top:6px;transition:.3s}
+  .dot{width:6px;height:6px;border-radius:50%;animation:pulse 1.5s infinite}
+
+  /* SPARKLINE */
+  #spark{display:block;width:100%;margin-top:10px}
+
+  /* METRICS */
+  .metrics{display:flex;gap:6px;flex-wrap:wrap}
+  .metric{flex:1;min-width:60px;background:var(--bg);border-radius:8px;padding:8px 10px;border:1px solid var(--border)}
+  .ml{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+  .mv{font-size:13px;font-weight:700;margin-top:2px}
+
+  /* BUTTONS */
+  .btn-start{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;
+    font-family:'Share Tech Mono',monospace;font-weight:700;font-size:11px;letter-spacing:1px;
+    background:linear-gradient(135deg,#00e676,#00a152);color:#fff;
+    box-shadow:0 0 16px #00e67630;transition:.2s}
+  .btn-start.active{background:linear-gradient(135deg,#ff1744,#b71c1c);box-shadow:0 0 16px #ff174430}
+  .btn-ai{width:100%;padding:12px;border-radius:10px;border:1px solid #3a0a7e;
+    background:linear-gradient(135deg,#12082e,#1e0a3e);cursor:pointer;
+    color:var(--purple);font-family:'Share Tech Mono',monospace;font-weight:700;font-size:11px;
+    letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+  /* STATUS */
+  .status-msg{font-size:9px;color:#888;max-width:120px;text-align:right;line-height:1.3}
+
+  /* POSITION CARD */
+  .pos-card{background:#050f05;border:1px solid #00e67620;border-radius:12px;padding:12px;margin-top:8px}
+  .pos-title{font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:6px}
+  .pos-row{display:flex;gap:12px}
+
+  /* AI CARD */
+  .ai-card{background:#0a0820;border:1px solid #3a0a7e30;border-radius:12px;padding:12px;margin-top:8px}
+  .ai-text{font-size:11px;color:var(--purple);line-height:1.7;margin-bottom:8px}
+
+  /* ORDERS */
+  .order-row{display:flex;justify-content:space-between;align-items:center;
+    padding:8px 10px;border-radius:8px;margin-bottom:5px}
+  .order-row.open{background:#0d0d20;border:1px solid var(--border)}
+  .order-row.win{background:#00e67608;border:1px solid #00e67625}
+  .order-row.loss{background:#ff174408;border:1px solid #ff174425}
+
+  /* SETTINGS */
+  .input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px;
+    padding:10px 12px;outline:none}
+  .label{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+  .range-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .range-label{font-size:10px;color:#888;min-width:120px}
+  input[type=range]{flex:1;accent-color:var(--orange);height:4px}
+  .warn{font-size:9px;color:var(--orange);line-height:1.6;padding:8px 10px;
+    background:#0a0500;border-radius:6px;border:1px solid #ff6b0020;margin-top:8px}
+
+  /* TABBAR */
+  #tabbar{background:var(--bg);border-top:1px solid var(--border);display:flex;flex-shrink:0}
+  .tab{flex:1;padding:10px 0;text-align:center;font-size:9px;font-weight:700;
+    letter-spacing:1px;cursor:pointer;color:#333;background:none;border:none;
+    font-family:'Share Tech Mono',monospace;border-top:2px solid transparent;transition:.2s}
+  .tab.active{color:var(--orange);border-top-color:var(--orange)}
+  .tab-icon{font-size:20px;display:block}
+
+  /* ANIMATIONS */
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+  @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .slide{animation:slideUp .3s ease}
+  .spinning{animation:spin 1s linear infinite;display:inline-block}
+
+  /* INSTALL BANNER */
+  #install-banner{background:linear-gradient(135deg,#0a0a1e,#151530);border:1px solid var(--orange);
+    border-radius:12px;padding:12px 14px;margin:10px 12px;display:none;
+    flex-direction:column;gap:8px}
+  #install-banner.show{display:flex}
+  .install-title{font-size:11px;color:var(--orange);font-weight:700;letter-spacing:1px}
+  .install-text{font-size:10px;color:#888;line-height:1.6}
+  .btn-install{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;
+    background:var(--orange);color:#fff;font-family:'Share Tech Mono',monospace;
+    font-weight:700;font-size:11px;align-self:flex-start}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HEADER -->
+  <div id="header">
+    <div class="hrow">
+      <div class="logo"><span>▶</span> BYBOT<span style="font-size:11px">.ai</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="status-msg" id="status-msg"></div>
+        <button class="btn-start" id="btn-bot" onclick="toggleBot()">INICIAR</button>
+      </div>
+    </div>
+    <div class="pairs" id="pairs"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <!-- INSTALL BANNER -->
+    <div id="install-banner">
+      <div class="install-title">📱 Instalar como App</div>
+      <div class="install-text">Adicione à tela inicial para usar como app nativo sem abrir o navegador.</div>
+      <button class="btn-install" id="btn-install">Instalar Agora</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="slide">
+      <div class="card">
+        <div class="card-title" id="pair-label">BTC/USDT · PERPETUAL</div>
+        <div>
+          <span class="price-big" id="price-display">$0</span>
+          <span class="price-chg" id="price-chg">+0.00%</span>
+        </div>
+        <div id="sig-pill" class="sig-pill">
+          <span class="dot" id="sig-dot"></span>
+          <span id="sig-text">AGUARDANDO...</span>
+        </div>
+        <canvas id="spark" height="50"></canvas>
+      </div>
+
+      <div style="padding:0 12px">
+        <div class="metrics" id="metrics">
+          <div class="metric"><div class="ml">RSI</div><div class="mv" id="m-rsi">--</div></div>
+          <div class="metric"><div class="ml">EMA 9</div><div class="mv" id="m-ema">--</div></div>
+          <div class="metric"><div class="ml">MOMENTUM</div><div class="mv" id="m-mom">--</div></div>
+          <div class="metric"><div class="ml">SCORE</div><div class="mv" id="m-score">--</div></div>
+        </div>
+      </div>
+
+      <div class="card" id="bot-status-card" style="display:none;background:#050f05;border-color:#00e67620">
+        <div class="card-title" style="color:var(--green)">🤖 BOT ATIVO — BYBIT REAL</div>
+        <div style="display:flex;justify-content:space-between">
+          <div><div class="ml">SALDO</div><div style="font-size:18px;font-weight:700;color:#fff" id="s-balance">$0.00</div></div>
+          <div style="text-align:right"><div class="ml">ÚLTIMO SINAL</div><div style="font-size:14px;font-weight:700" id="s-signal">--</div></div>
+        </div>
+        <div id="pos-card" class="pos-card" style="display:none">
+          <div class="pos-title">🔥 POSIÇÃO ABERTA</div>
+          <div class="pos-row" id="pos-info"></div>
+        </div>
+      </div>
+
+      <div style="padding:0 12px;margin-bottom:10px">
+        <button class="btn-ai" onclick="getAI()" id="btn-ai">✦ Análise IA (Claude)</button>
+        <div id="ai-card" class="ai-card" style="display:none">
+          <div class="ai-text" id="ai-text"></div>
+          <div class="metrics" id="ai-metrics"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="tab-orders" style="display:none;padding:12px" class="slide">
+      <div class="card" style="margin:0">
+        <div class="card-title">HISTÓRICO DE ORDENS</div>
+        <div id="orders-list">
+          <div style="color:#222;text-align:center;padding:30px;font-size:11px">
+            Nenhuma ordem ainda.<br>Ative o bot para começar.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" style="display:none;padding:12px" class="slide">
+      <div class="card" style="margin:0 0 10px">
+        <div class="card-title">API BYBIT</div>
+        <div style="margin-bottom:10px">
+          <label class="label">API KEY</label>
+          <input class="input" type="text" id="api-key" placeholder="Cole sua API Key aqui">
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="label">SECRET KEY</label>
+          <input class="input" type="password" id="api-secret" placeholder="Cole seu Secret aqui">
+        </div>
+        <div class="warn">⚠️ Nunca compartilhe suas chaves. Use permissão somente de Trade, sem saques.</div>
+      </div>
+
+      <div class="card" style="margin:0 0 10px">
+        <div class="card-title">PARÂMETROS</div>
+        <div class="range-row">
+          <span class="range-label" id="lbl-lev">Alavancagem: 5x</span>
+          <input type="range" min="1" max="20" value="5" id="inp-lev" oninput="document.getElementById('lbl-lev').textContent='Alavancagem: '+this.value+'x'">
+        </div>
+        <div class="range-row">
+          <span class="range-label" id="lbl-size">Tamanho: $50</span>
+          <input type="range" min="10" max="500" step="10" value="50" id="inp-size" oninput="document.getElementById('lbl-size').textContent='Tamanho: $'+this.value">
+        </div>
+      </div>
+
+      <div class="card" style="margin:0">
+        <div class="card-title">ESTRATÉGIA</div>
+        <div style="font-size:10px;color:#666;line-height:2">
+          <div>📊 RSI (14) + EMA 9/21</div>
+          <div>🎯 Confiança mínima: 68%</div>
+          <div>💰 Take Profit: +1.5%</div>
+          <div>🛡️ Stop Loss: -0.8%</div>
+          <div>⏱️ Ciclo: 30 segundos</div>
+          <div>🌐 bybot-qssd.onrender.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABBAR -->
+  <div id="tabbar">
+    <button class="tab active" onclick="showTab('dashboard',this)">
+      <span class="tab-icon">◈</span>PAINEL
+    </button>
+    <button class="tab" onclick="showTab('orders',this)">
+      <span class="tab-icon">≡</span>ORDENS
+    </button>
+    <button class="tab" onclick="showTab('settings',this)">
+      <span class="tab-icon">⚙</span>CONFIG
+    </button>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://bybot-qssd.onrender.com';
+const PAIRS = [
+  {symbol:'BTCUSDT',label:'BTC/USDT',base:67800,icon:'₿'},
+  {symbol:'ETHUSDT',label:'ETH/USDT',base:3540,icon:'Ξ'},
+  {symbol:'SOLUSDT',label:'SOL/USDT',base:172,icon:'◎'},
+];
+
+let pairIdx = 0;
+let botActive = false;
+let priceHistory = [];
+let basePrice = PAIRS[0].base;
+let currentPrice = basePrice;
+let pollInterval = null;
+let deferredPrompt = null;
+
+// ── Init pairs ──────────────────────────────────────────────────────────────
+const pairsEl = document.getElementById('pairs');
+PAIRS.forEach((p,i) => {
+  const btn = document.createElement('button');
+  btn.className = 'pair' + (i===0?' active':'');
+  btn.textContent = p.icon+' '+p.label;
+  btn.onclick = () => {
+    pairIdx = i; basePrice = p.base; currentPrice = p.base;
+    priceHistory = [];
+    document.querySelectorAll('.pair').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('pair-label').textContent = p.label+' · PERPETUAL';
+  };
+  pairsEl.appendChild(btn);
+});
+
+// ── Fake price feed ──────────────────────────────────────────────────────────
+priceHistory = Array.from({length:60},(_,i)=>({
+  t:Date.now()-(60-i)*5000,
+  v:basePrice+(Math.random()-.5)*basePrice*.01
+}));
+
+setInterval(()=>{
+  const delta=(Math.random()-.49)*currentPrice*.002;
+  currentPrice+=delta;
+  priceHistory.push({t:Date.now(),v:currentPrice});
+  if(priceHistory.length>80) priceHistory.shift();
+  updateUI();
+},800);
+
+// ── Signal calculation ───────────────────────────────────────────────────────
+function calcRSI(prices,period=14){
+  if(prices.length<period+1) return 50;
+  const ch=prices.slice(1).map((p,i)=>p-prices[i]);
+  const r=ch.slice(-period);
+  const g=r.filter(c=>c>0).reduce((a,b)=>a+b,0)/period;
+  const l=Math.abs(r.filter(c=>c<0).reduce((a,b)=>a+b,0))/period;
+  if(l===0) return 100;
+  return 100-100/(1+g/l);
+}
+function calcEMA(prices,period){
+  if(prices.length<period) return prices[prices.length-1];
+  const k=2/(period+1);
+  let ema=prices.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  for(let i=period;i<prices.length;i++) ema=prices[i]*k+ema*(1-k);
+  return ema;
+}
+function getSignal(){
+  const prices=priceHistory.map(h=>h.v);
+  const rsi=calcRSI(prices);
+  const ema9=calcEMA(prices,9);
+  const ema21=calcEMA(prices,21);
+  const last=prices[prices.length-1];
+  const prev=prices[prices.length-6]||last;
+  const mom=((last-prev)/prev)*100;
+  let score=50;
+  if(rsi<35) score+=20; else if(rsi>65) score-=20;
+  if(ema9>ema21) score+=15; else score-=15;
+  if(mom>0.1) score+=10; else if(mom<-.1) score-=10;
+  const signal=score>=65?'LONG':score<=35?'SHORT':'NEUTRO';
+  const conf=Math.min(95,Math.abs(score-50)*2+40);
+  return{signal,confidence:conf.toFixed(0),rsi,ema9,ema21,momentum:mom,score};
+}
+
+// ── Draw sparkline ───────────────────────────────────────────────────────────
+function drawSpark(color){
+  const canvas=document.getElementById('spark');
+  const w=canvas.offsetWidth; const h=50;
+  canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  const vals=priceHistory.map(p=>p.v);
+  const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();
+  vals.forEach((v,i)=>{
+    const x=(i/(vals.length-1))*w;
+    const y=h-((v-min)/range)*h;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+}
+
+// ── Update UI ────────────────────────────────────────────────────────────────
+function fmt(n,d=2){return Number(n).toFixed(d)}
+function pct(n){return(n>=0?'+':'')+fmt(n,2)+'%'}
+
+function updateUI(){
+  const sig=getSignal();
+  const color=sig.signal==='LONG'?'#00e676':sig.signal==='SHORT'?'#ff1744':'#ffd600';
+  const chg=((currentPrice-basePrice)/basePrice)*100;
+
+  document.getElementById('price-display').textContent=
+    '$'+(currentPrice<1000?fmt(currentPrice):fmt(currentPrice,0));
+  const chgEl=document.getElementById('price-chg');
+  chgEl.textContent=pct(chg);
+  chgEl.className='price-chg '+(chg>=0?'up':'down');
+
+  const pill=document.getElementById('sig-pill');
+  pill.style.background=color+'18';
+  pill.style.color=color;
+  pill.style.border='1px solid '+color+'60';
+  document.getElementById('sig-dot').style.background=color;
+  document.getElementById('sig-text').textContent=sig.signal+' · '+sig.confidence+'% conf.';
+
+  document.getElementById('m-rsi').textContent=fmt(sig.rsi,1);
+  document.getElementById('m-rsi').style.color=sig.rsi>65?'#ff1744':sig.rsi<35?'#00e676':'#c8c8f0';
+  document.getElementById('m-ema').textContent=currentPrice<1000?fmt(sig.ema9):fmt(sig.ema9,0);
+  document.getElementById('m-mom').textContent=pct(sig.momentum);
+  document.getElementById('m-mom').style.color=sig.momentum>=0?'#00e676':'#ff1744';
+  document.getElementById('m-score').textContent=fmt(sig.score,0);
+  document.getElementById('m-score').style.color=color;
+
+  drawSpark(color);
+}
+
+// ── Bot control ──────────────────────────────────────────────────────────────
+async function toggleBot(){
+  if(!botActive){
+    const key=document.getElementById('api-key').value.trim();
+    const secret=document.getElementById('api-secret').value.trim();
+    if(!key||!secret){
+      setMsg('⚠️ Insira API Key e Secret!');
+      showTab('settings',document.querySelectorAll('.tab')[2]);
+      return;
+    }
+    setMsg('Iniciando...');
+    try{
+      const r=await fetch(BACKEND+'/bot/start',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          api_key:key,api_secret:secret,
+          symbol:PAIRS[pairIdx].symbol,
+          leverage:+document.getElementById('inp-lev').value,
+          order_size_usdt:+document.getElementById('inp-size').value,
+          min_confidence:68,tp_pct:1.5,sl_pct:0.8
+        })
+      });
+      const d=await r.json();
+      if(d.ok){
+        botActive=true;
+        document.getElementById('btn-bot').textContent='PARAR';
+        document.getElementById('btn-bot').classList.add('active');
+        document.getElementById('bot-status-card').style.display='block';
+        setMsg('✅ Bot ativo!');
+        startPoll();
+      } else setMsg('❌ '+( d.detail||'Erro'));
+    } catch(e){ setMsg('❌ Servidor offline'); }
+  } else {
+    try{ await fetch(BACKEND+'/bot/stop',{method:'POST'}); } catch(e){}
+    botActive=false;
+    document.getElementById('btn-bot').textContent='INICIAR';
+    document.getElementById('btn-bot').classList.remove('active');
+    document.getElementById('bot-status-card').style.display='none';
+    clearInterval(pollInterval);
+    setMsg('🛑 Bot parado.');
+  }
+}
+
+function setMsg(msg){ document.getElementById('status-msg').textContent=msg; }
+
+function startPoll(){
+  pollInterval=setInterval(async()=>{
+    try{
+      const r=await fetch(BACKEND+'/bot/status');
+      const d=await r.json();
+      if(d.balance) document.getElementById('s-balance').textContent='$'+fmt(d.balance);
+      if(d.last_signal){
+        const sc=d.last_signal;
+        const el=document.getElementById('s-signal');
+        el.textContent=sc.signal;
+        el.style.color=sc.signal==='LONG'?'#00e676':sc.signal==='SHORT'?'#ff1744':'#ffd600';
+      }
+      if(d.open_position){
+        const pos=d.open_position;
+        document.getElementById('pos-card').style.display='block';
+        document.getElementById('pos-info').innerHTML=
+          ['LADO','ENTRADA','TP','SL'].map((l,i)=>{
+            const vals=[pos.side,fmt(pos.entry,2),fmt(pos.tp,2),fmt(pos.sl,2)];
+            return`<div><div class="ml">${l}</div><div style="font-size:11px;font-weight:700">${vals[i]}</div></div>`;
+          }).join('');
+      } else document.getElementById('pos-card').style.display='none';
+      if(d.orders&&d.orders.length){
+        document.getElementById('orders-list').innerHTML=d.orders.map(o=>`
+          <div class="order-row ${o.status==='GANHO'?'win':o.status==='PERDA'?'loss':'open'}">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:${o.status==='GANHO'?'#00e676':o.status==='PERDA'?'#ff1744':'#c8c8f0'}">${o.side}</div>
+              <div style="font-size:9px;color:#444">${o.pair||''} · ${o.time||''}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;font-weight:700">${fmt(o.entry,2)}</div>
+              <div style="font-size:9px;color:#444">${fmt(o.size||0)} USDT</div>
+            </div>
+          </div>`).join('');
+      }
+    }catch(e){}
+  },5000);
+}
+
+// ── AI Analysis ──────────────────────────────────────────────────────────────
+async function getAI(){
+  const sig=getSignal();
+  const btn=document.getElementById('btn-ai');
+  btn.innerHTML='<span class="spinning">⟳</span> Analisando...';
+  btn.disabled=true;
+  document.getElementById('ai-card').style.display='none';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:800,
+        messages:[{role:'user',content:`Você é trader quantitativo especialista em day trade de cripto na Bybit.
+Par: ${PAIRS[pairIdx].label} | Sinal: ${sig.signal} | RSI: ${fmt(sig.rsi)} | Momentum: ${pct(sig.momentum)} | Confiança: ${sig.confidence}%
+Responda SOMENTE com JSON puro sem markdown:
+{"resumo":"análise em 2 frases","tp":"ex: 1.5%","sl":"ex: 0.8%","alavancagem":"ex: 5x","risco":"baixo|médio|alto"}`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'{}';
+    const ai=JSON.parse(text.replace(/```json|```/g,'').trim());
+    document.getElementById('ai-text').textContent=ai.resumo||'';
+    const fields=[
+      {l:'TP',v:ai.tp,c:'#00e676'},{l:'SL',v:ai.sl,c:'#ff1744'},
+      {l:'ALAV.',v:ai.alavancagem,c:'#ff6b00'},
+      {l:'RISCO',v:ai.risco,c:ai.risco==='baixo'?'#00e676':ai.risco==='alto'?'#ff1744':'#ffd600'}
+    ].filter(f=>f.v);
+    document.getElementById('ai-metrics').innerHTML=fields.map(f=>`
+      <div class="metric"><div class="ml">${f.l}</div><div class="mv" style="color:${f.c}">${f.v}</div></div>`).join('');
+    document.getElementById('ai-card').style.display='block';
+  }catch(e){
+    document.getElementById('ai-text').textContent='Erro ao consultar IA.';
+    document.getElementById('ai-card').style.display='block';
+  }
+  btn.innerHTML='✦ Análise IA (Claude)';
+  btn.disabled=false;
+}
+
+// ── Tab navigation ───────────────────────────────────────────────────────────
+function showTab(name,btn){
+  ['dashboard','orders','settings'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── PWA Install ──────────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('btn-install').onclick=async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const{outcome}=await deferredPrompt.userChoice;
+    if(outcome==='accepted') document.getElementById('install-banner').classList.remove('show');
+    deferredPrompt=null;
+  }
+};
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+// ── iOS install hint ─────────────────────────────────────────────────────────
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.matchMedia('(display-mode:standalone)').matches;
+if(isIOS&&!isStandalone){
+  const banner=document.getElementById('install-banner');
+  banner.classList.add('show');
+  document.getElementById('install-text').textContent=
+    'No Safari: toque em compartilhar ↑ → "Adicionar à Tela de Início"';
+  document.getElementById('btn-install').style.display='none';
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+updateUI();
+</script>
+</body>
+</html>
